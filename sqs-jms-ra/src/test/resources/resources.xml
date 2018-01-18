@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<Resource id="testra" class-name="com.integralblue.sqsjmara.SQSJMSResourceAdapter" type="com.integralblue.sqsjmara.SQSJMSResourceAdapter">
+	</Resource>
+    <Resource id="TestConnectionFactory" type="javax.jms.QueueConnectionFactory" class-name="com.integralblue.sqsjmara.SQSJMSManagedConnectionFactory">
+        ResourceAdapter=testra
+        TransactionSupport=none
+    </Resource>
+    <Resource id="TestQueue" type="javax.jms.Queue" class-name="com.integralblue.sqsjmara.SQSJMSQueue">
+    	queueName=sqs-jms-ra-test-queue
+    	ResourceAdapter=testra
+    </Resource>
+</resources>

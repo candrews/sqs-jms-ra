@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.integralblue</groupId>
+		<artifactId>sqs-jms-ra-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>sqs-jms-rar</artifactId>
+	<name>AWS SQS JMS JCA Resource Adapter Archive</name>
+	<description>JCA resource adapter to use AWS SQS's JMS interface</description>
+	<packaging>rar</packaging>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sqs-jms-ra</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+	</dependencies>
+</project>
+
