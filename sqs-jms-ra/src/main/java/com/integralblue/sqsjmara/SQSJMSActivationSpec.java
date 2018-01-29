@@ -125,7 +125,15 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 
 	@Override
 	public void validate() throws InvalidPropertyException {
-
+		if (StringUtils.isNullOrEmpty(getAwsRegionProvider().getRegion())) {
+			throw new InvalidPropertyException("Must set the 'region' property or provide the region to use via one of the com.amazonaws.regions.DefaultAwsRegionProviderChain supported mechanisms");
+		}
+		try {
+			getCredentials();
+		}
+		catch (final Exception e) { //NOPMD
+			throw new InvalidPropertyException("Must set awsAccessKeyId and awsSecretKey or provide the credentials to use via one of the com.amazonaws.auth.DefaultAWSCredentialsProviderChain supported mechanisms", e);
+		}
 	}
 
 	public String getAwsAccessKeyId() {
