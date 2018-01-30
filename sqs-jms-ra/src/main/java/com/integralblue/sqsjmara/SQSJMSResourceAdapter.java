@@ -24,12 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.QueueSession;
+import javax.jms.Session;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
@@ -46,6 +50,7 @@ import com.amazon.sqs.javamessaging.SQSConnection;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 
 /**
  * {@link ResourceAdapter} for SQS.
@@ -94,6 +99,23 @@ public class SQSJMSResourceAdapter implements ResourceAdapter, Serializable {
 		registeredConnections.clear();
 	}
 
+	private SQSJMSQueue getSQSJMSQueue(final SQSJMSActivationSpec sqsSpec) throws ResourceException {
+		final SQSJMSQueue sqsjmsQueue;
+		if (sqsSpec.getUseJndi()) {
+			try {
+				sqsjmsQueue = (SQSJMSQueue) InitialContext.doLookup(sqsSpec.getDestination());
+			}
+			catch (final NamingException e) {
+				throw new ResourceException("JNDI lookup failed for "
+						+ sqsSpec.getDestination(), e);
+			}
+		}
+		else {
+			sqsjmsQueue = new SQSJMSQueue(sqsSpec.getDestination());
+		}
+		return sqsjmsQueue;
+	}
+
 	@Override
 	@SuppressWarnings({"PMD.NcssCount", "PMD.CyclomaticComplexity"})
 	public void endpointActivation(final MessageEndpointFactory endpointFactory, final ActivationSpec spec)
@@ -117,10 +139,20 @@ public class SQSJMSResourceAdapter implements ResourceAdapter, Serializable {
 			);
 
 		try {
+			final SQSJMSQueue sqsjmsQueue = getSQSJMSQueue(sqsSpec);
+
 			final SQSConnection connection = connectionFactory.createConnection();
 			registeredConnections.put(endpointFactory, connection);
-			final QueueSession session = connection.createQueueSession(false, sqsSpec.getAcknowledgeMode());
-			final Queue queue = session.createQueue(sqsSpec.getQueueName());
+			final QueueSession session = connection.createQueueSession(false, acknowledgeModeStringToInt(sqsSpec.getAcknowledgeMode()));
+
+			final Queue queue;
+			try {
+				queue = session.createQueue(sqsjmsQueue.getQueueName());
+			}
+			catch (final InvalidDestinationException | QueueDoesNotExistException e) {
+				throw new ResourceException("Queue with name '" + sqsjmsQueue.getQueueName() + "' does not exist", e);
+			}
+
 			final MessageConsumer messageConsumer = session.createConsumer(queue);
 			messageConsumer.setMessageListener(new MessageListener() {
 				@Override
@@ -144,8 +176,24 @@ public class SQSJMSResourceAdapter implements ResourceAdapter, Serializable {
 			});
 			connection.start();
 		}
-		catch (JMSException e) {
+		catch (final JMSException e) {
 			throw new ResourceException(e);
+		}
+	}
+
+	@SuppressWarnings({"PMD.DefaultPackage"})
+	static int acknowledgeModeStringToInt(final String acknowledgeMode) {
+		if ("auto-acknowledge".equalsIgnoreCase(acknowledgeMode)) {
+			return Session.AUTO_ACKNOWLEDGE;
+		}
+		else if ("client-acknowledge".equalsIgnoreCase(acknowledgeMode)) {
+			return Session.CLIENT_ACKNOWLEDGE;
+		}
+		else if ("dups-ok-acknowledge".equalsIgnoreCase(acknowledgeMode)) {
+			return Session.DUPS_OK_ACKNOWLEDGE;
+		}
+		else {
+			throw new IllegalArgumentException("valid acknowledgeModes are: auto-acknowledge, client-acknowledge, and dups-ok-acknowledge");
 		}
 	}
 
@@ -155,7 +203,7 @@ public class SQSJMSResourceAdapter implements ResourceAdapter, Serializable {
 		try {
 			connection.close();
 		}
-		catch (JMSException e) {
+		catch (final JMSException e) {
 			throw new RuntimeException(e); //NOPMD
 		}
 	}

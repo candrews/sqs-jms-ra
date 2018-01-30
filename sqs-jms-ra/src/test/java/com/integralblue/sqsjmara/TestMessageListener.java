@@ -25,10 +25,10 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 @MessageDriven(
+		mappedName="TestQueue",
 		messageListenerInterface=javax.jms.MessageListener.class,
 		activationConfig = {
-			@ActivationConfigProperty(propertyName = "queueName", propertyValue = "sqs-jms-ra-test-queue"),
-			@ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "1") })
+			@ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
 // activation config properties are from com.integralblue.sqsjmara.SQSJMSActivationSpec
 public class TestMessageListener implements MessageListener {
 	@EJB

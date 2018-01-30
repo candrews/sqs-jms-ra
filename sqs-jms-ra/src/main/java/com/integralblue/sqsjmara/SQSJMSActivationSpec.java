@@ -18,15 +18,15 @@ package com.integralblue.sqsjmara;
 
 import java.io.Serializable;
 
+import javax.jms.Queue;
 import javax.resource.ResourceException;
 import javax.resource.spi.Activation;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.ConfigProperty;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
@@ -62,15 +62,22 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 	@ConfigProperty(description = "Region of the SQS queue. If not set, defers to com.amazonaws.regions.DefaultAwsRegionProviderChain")
 	private String region;
 
-	@ConfigProperty(description = "Values are AUTO_ACKNOWLEDGE (1), CLIENT_ACKNOWLEDGE (2), or DUPS_OK_ACKNOWLEDGE (3).")
-	@Min(1)
-	@Max(3)
+	@ConfigProperty(description = "Values are Auto-acknowledge, Dups-ok-acknowledge, and Client-acknowledge")
 	@NotNull
-	private Integer acknowledgeMode;
+	private String acknowledgeMode;
 
-	@ConfigProperty
+	@ConfigProperty(description = "Use JNDI to look up the destination queue. Otherwise, use destination as the name of the queue.", defaultValue = "true")
 	@NotNull
-	private String queueName;
+	private Boolean useJndi = true;
+
+	@ConfigProperty(description = "Destination (queue) from which messages are consumed. If useJndi, then treated as a JNDI name. Otherwise, treated as the name of a queue.")
+	@NotNull
+	private String destination;
+
+	@ConfigProperty(description = "Destination type. Must be 'javax.jms.Queue'.", defaultValue = "javax.jms.Queue")
+	@NotNull
+	@Pattern(regexp = "^javax\\.jms\\.Queue$")
+	private String destinationType = Queue.class.getName();
 
 	public SQSJMSActivationSpec() {
 		final Region currentRegion = Regions.getCurrentRegion();
@@ -125,6 +132,15 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 
 	@Override
 	public void validate() throws InvalidPropertyException {
+		if (!Queue.class.getName().equals(destinationType)) {
+			throw new InvalidPropertyException("'destinationType' must be '" + Queue.class.getName() + "'.");
+		}
+		try {
+			SQSJMSResourceAdapter.acknowledgeModeStringToInt(acknowledgeMode);
+		}
+		catch (final IllegalArgumentException e) {
+			throw new InvalidPropertyException(e.getMessage(), e);
+		}
 		if (StringUtils.isNullOrEmpty(getAwsRegionProvider().getRegion())) {
 			throw new InvalidPropertyException("Must set the 'region' property or provide the region to use via one of the com.amazonaws.regions.DefaultAwsRegionProviderChain supported mechanisms");
 		}
@@ -149,20 +165,28 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 		return awsCredentialsProvider.getCredentials();
 	}
 
-	public Integer getAcknowledgeMode() {
+	public String getAcknowledgeMode() {
 		return acknowledgeMode;
 	}
 
-	public void setAcknowledgeMode(final Integer acknowledgeMode) {
+	public void setAcknowledgeMode(final String acknowledgeMode) {
 		this.acknowledgeMode = acknowledgeMode;
 	}
 
-	public void setQueueName(final String queueName) {
-		this.queueName = queueName;
+	public void setDestination(final String destination) {
+		this.destination = destination;
 	}
 
-	public String getQueueName() {
-		return queueName;
+	public String getDestination() {
+		return destination;
+	}
+
+	public Boolean getUseJndi() {
+		return useJndi;
+	}
+
+	public void setUseJndi(final Boolean useJndi) {
+		this.useJndi = useJndi;
 	}
 
 	public String getRegion() {
