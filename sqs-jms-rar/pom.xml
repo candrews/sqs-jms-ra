@@ -18,5 +18,24 @@
 			<type>jar</type>
 		</dependency>
 	</dependencies>
+	<build>
+	<plugins>
+	  <plugin>
+	    <!-- workaround https://github.com/jcabi/jcabi-parent/pull/80 -->
+	    <artifactId>maven-source-plugin</artifactId>
+	    <executions>
+	      <execution>
+		<configuration>
+		<forceCreation>true</forceCreation>
+		</configuration>
+	        <id>jcabi-sources</id>
+	        <goals>
+	          <goal>jar</goal>
+	        </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+	</plugins>
+	</build>
 </project>
 
