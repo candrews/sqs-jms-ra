@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.integralblue</groupId>
 		<artifactId>sqs-jms-ra-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>sqs-jms-ra</artifactId>
 	<name>AWS SQS JMS JCA Resource Adapter</name>
