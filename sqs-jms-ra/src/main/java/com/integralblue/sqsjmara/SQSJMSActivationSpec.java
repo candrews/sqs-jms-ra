@@ -202,7 +202,7 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 		return new AwsRegionProviderChain(
 				new AwsRegionProvider() {
 					@Override
-					public String getRegion() throws SdkClientException {
+					public String getRegion() {
 						return StringUtils.isNullOrEmpty(region) ? null : region;
 					}
 				},
