@@ -89,8 +89,7 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 	private final AWSCredentials awsCredentials = new AWSCredentials() {
 		@Override
 		public String getAWSAccessKeyId() {
-			if (StringUtils.isNullOrEmpty(awsAccessKeyId)
-					|| StringUtils.isNullOrEmpty(awsAccessKeyId)) {
+			if (StringUtils.isNullOrEmpty(awsAccessKeyId)) {
 				throw new SdkClientException("awsAccessKeyId not set on " + this.getClass().getName());
 			}
 			else {
@@ -100,7 +99,7 @@ public class SQSJMSActivationSpec implements ActivationSpec, Serializable, AWSCr
 
 		@Override
 		public String getAWSSecretKey() {
-			if (StringUtils.isNullOrEmpty(awsSecretKey) || StringUtils.isNullOrEmpty(awsSecretKey)) {
+			if (StringUtils.isNullOrEmpty(awsSecretKey)) {
 				throw new SdkClientException("awsSecretKey not set on " + this.getClass().getName());
 			}
 			else {
