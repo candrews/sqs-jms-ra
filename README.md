@@ -7,6 +7,7 @@ SQS JMS Resource Adapter
 [![Reference Status](https://www.versioneye.com/java/com.integralblue:sqs-jms-ra/reference_badge.svg?style=flat-square)](https://www.versioneye.com/java/com.integralblue:sqs-jms-ra/references)
 [![Dependency Status](https://www.versioneye.com/java/com.integralblue:sqs-jms-ra/badge?style=flat-square)](https://www.versioneye.com/java/com.integralblue:sqs-jms-ra)
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.integralblue/sqs-jms-ra/badge.svg)](http://www.javadoc.io/doc/com.integralblue/sqs-jms-ra)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.integralblue%3Asqs-jms-ra&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.integralblue:sqs-jms-ra)
 
 The SQS JMS Resource Adapter provides a way to access AWS (Amazon Web Services) SQS (Simple Queue Service) as JMS (Java Message Service) resources using JCA (Java EE Connector Architecture).
 
