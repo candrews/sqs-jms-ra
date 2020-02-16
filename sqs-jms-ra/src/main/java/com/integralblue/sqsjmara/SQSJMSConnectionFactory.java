@@ -87,7 +87,7 @@ public class SQSJMSConnectionFactory implements QueueConnectionFactory {
 
 	@Override
 	public QueueConnection createQueueConnection(final String userName, final String password) throws JMSException {
-		return createQueueConnection(userName, password);
+		return createConnection(userName, password);
 	}
 
 }
